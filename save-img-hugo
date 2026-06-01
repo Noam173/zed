@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+
+# This script copies a clipboard image to a webp file in the website directory.
+
+set -euo pipefail
+
+year="$(date +%Y)"
+dest_dir="/home/titus/github/website/static/images/${year}"
+
+if ! command -v cwebp >/dev/null 2>&1; then
+  echo "cwebp not found in PATH" >&2
+  exit 1
+fi
+
+mkdir -p "$dest_dir"
+
+if [[ -z "${ZED_FILE:-}" ]]; then
+  echo "ZED_FILE is not set. Run this from Zed with a markdown file open." >&2
+  exit 1
+fi
+
+if [[ ! -f "$ZED_FILE" ]]; then
+  echo "Open file does not exist: $ZED_FILE" >&2
+  exit 1
+fi
+
+if [[ "${ZED_FILE##*.}" != "md" ]]; then
+  echo "Current file is not a .md file: $ZED_FILE" >&2
+  exit 1
+fi
+
+prompt_filename() {
+  local default="img-$(date +%Y%m%d-%H%M%S)"
+  local input
+
+  if [[ -t 0 ]]; then
+    if ! read -r -p "Filename (without extension) [$default]: " input; then
+      return 1
+    fi
+    printf '%s' "${input:-$default}"
+    return 0
+  fi
+
+  if command -v zenity >/dev/null 2>&1; then
+    if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+      if ! input="$(zenity --entry --title="Image filename" --text="Filename (without extension):" --entry-text "$default")"; then
+        return 1
+      fi
+      printf '%s' "${input:-$default}"
+      return 0
+    fi
+    if [[ -n "${DISPLAY:-}" ]]; then
+      if ! input="$(GDK_BACKEND=x11 zenity --entry --title="Image filename" --text="Filename (without extension):" --entry-text "$default")"; then
+        return 1
+      fi
+      printf '%s' "${input:-$default}"
+      return 0
+    fi
+  fi
+
+  if command -v kdialog >/dev/null 2>&1 && { [[ -n "${DISPLAY:-}" ]] || [[ -n "${WAYLAND_DISPLAY:-}" ]]; }; then
+    if ! input="$(kdialog --title "Image filename" --inputbox "Filename (without extension):" "$default")"; then
+      return 1
+    fi
+    printf '%s' "${input:-$default}"
+    return 0
+  fi
+
+  echo "No prompt method available (no TTY or GUI prompt found)" >&2
+  return 1
+}
+
+if [[ -n "${1:-}" ]]; then
+  base_name="$1"
+else
+  if ! base_name="$(prompt_filename)"; then
+    echo "Filename prompt canceled." >&2
+    exit 1
+  fi
+fi
+
+file_name="${base_name}.webp"
+dest_path="${dest_dir}/${file_name}"
+
+if [[ -e "$dest_path" ]]; then
+  i=1
+  while [[ -e "${dest_dir}/${base_name}-${i}.webp" ]]; do
+    i=$((i + 1))
+  done
+  file_name="${base_name}-${i}.webp"
+  dest_path="${dest_dir}/${file_name}"
+fi
+
+get_clipboard_image() {
+  if command -v wl-paste >/dev/null 2>&1 && [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+    local mime
+    mime="$(wl-paste --list-types 2>/dev/null | grep -m1 '^image/' || true)"
+    if [[ -n "$mime" ]]; then
+      if wl-paste --type "$mime" 2>/dev/null; then
+        return 0
+      fi
+    fi
+  fi
+
+  if command -v xclip >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" ]]; then
+    local mime
+    mime="$(xclip -selection clipboard -t TARGETS -o 2>/dev/null | tr -d '\r' | grep -m1 '^image/' || true)"
+    if [[ -n "$mime" ]]; then
+      if xclip -selection clipboard -t "$mime" -o 2>/dev/null; then
+        return 0
+      fi
+    fi
+  fi
+
+  if command -v xsel >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" ]]; then
+    if xsel --clipboard --output 2>/dev/null; then
+      return 0
+    fi
+  fi
+
+  echo "No image found in clipboard" >&2
+  return 1
+}
+
+get_clipboard_image | cwebp -quiet -q 80 -o "$dest_path" -- - 2>/dev/null
+
+markdown_link="![${file_name%.webp}](/images/${year}/${file_name})"
+
+insert_markdown() {
+  local target_file="$1"
+  local text="$2"
+  local row="${3:-}"
+  local tmp
+
+  if [[ -n "$row" && "$row" =~ ^[0-9]+$ && "$row" -gt 0 ]]; then
+    tmp="$(mktemp)"
+    awk -v row="$row" -v insert="$text" 'NR==row{print insert; inserted=1} {print} END{if(!inserted){print insert}}' \
+      "$target_file" > "$tmp"
+    mv "$tmp" "$target_file"
+    return 0
+  fi
+
+  printf '%s\n' "$text" >> "$target_file"
+}
+
+insert_markdown "$ZED_FILE" "$markdown_link" "${ZED_ROW:-}"
+printf '%s\n' "$markdown_link"
+
+if command -v wl-copy >/dev/null 2>&1; then
+  printf '%s' "$markdown_link" | wl-copy
+elif command -v xclip >/dev/null 2>&1; then
+  printf '%s' "$markdown_link" | xclip -selection clipboard
+elif command -v xsel >/dev/null 2>&1; then
+  printf '%s' "$markdown_link" | xsel --clipboard --input
+fi

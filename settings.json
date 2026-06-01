@@ -28,7 +28,10 @@
 			"type": "registry",
 		},
 		"github-copilot-cli": {
-			"type": "registry",
+			"default_config_options": {
+    "model": "gpt-5.2-codex"
+   },
+   "type": "registry",
 		},
 		"gemini": {
 			"type": "registry",
@@ -92,13 +95,13 @@
 	"icon_theme": {
 		"mode": "dark",
 		"light": "Catppuccin Mocha",
-		"dark": "Catppuccin Mocha",
+		"dark": "Material Icon Theme",
 	},
 	"base_keymap": "VSCode",
 	"theme": {
 		"mode": "dark",
-		"light": "Maple Light",
-		"dark": "Maple Dark",
+		"light": "Tokyo Night Light",
+		"dark": "Nord Dark",
 	},
 	"ui_font_size": 17,
 	"buffer_font_size": 18.5,
@@ -139,7 +142,8 @@
 	},
 	// Use Copilot Chat AI as default
 	"agent": {
-		"default_profile": "write",
+		"sidebar_side": "right",
+  "default_profile": "write",
 		"favorite_models": [
 			{
 				"provider": "copilot_chat",
@@ -183,15 +187,6 @@
 		},
 		"model_parameters": [],
 	},
-	// Uncomment below to use local AI with Ollama, refer https://zed.dev/docs/language-model-integration?highlight=ollama#using-ollama-on-macos
-	// "assistant": {
-	//   "default_model": {
-	//     "provider": "ollama",
-	//     "model": "llama3.1:latest"
-	//   },
-	//   "version": "2",
-	//   "provider": null
-	// },
 	"language_models": {
 		"opencode": {
 			"show_zen_models": false,
