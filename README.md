@@ -2,6 +2,21 @@
 
 This repository contains a Zed configuration bundle (settings, keybindings, tasks, and a helper script). Below is a complete, human-readable description of what each file changes from Zed defaults.
 
+## Quick install
+
+Run from the repo root:
+
+Linux/macOS (copies JSON into your Zed config folder):
+```bash
+chmod +x ./install
+./install
+```
+
+Windows (PowerShell, creates symlinks in `%APPDATA%\Zed`):
+```powershell
+.\install.ps1
+```
+
 ## settings.json
 
 ### UI, layout, and visuals
@@ -171,4 +186,3 @@ Helper script used by the **Save clipboard image (Hugo)** task:
   `/home/titus/github/website/static/images/<year>/<name>.webp`
 - Inserts a Markdown image link into the current file, at `ZED_ROW` when available.
 - Copies the Markdown link to the clipboard.
-
