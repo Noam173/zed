@@ -28,7 +28,13 @@
 			"type": "registry",
 		},
 		"github-copilot-cli": {
-			"default_config_options": {
+			"favorite_config_option_values": {
+    "model": [
+     "gpt-5.3-codex"
+    ]
+   },
+   "default_config_options": {
+    "allow_all": "on",
     "model": "gpt-5.2-codex"
    },
    "type": "registry",
