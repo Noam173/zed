@@ -6,11 +6,14 @@ This repository contains a Zed configuration bundle (settings, keybindings, task
 
 Run from the repo root:
 
-Linux/macOS (copies JSON into your Zed config folder):
+Linux/macOS (symlinks each JSON file into your Zed config folder):
 ```bash
-chmod +x ./install
 ./install
 ```
+
+The installer uses `${XDG_CONFIG_HOME:-$HOME/.config}/zed` and replaces
+same-named files or symlinks so changes in this repository are picked up by
+Zed automatically.
 
 Windows (PowerShell, creates symlinks in `%APPDATA%\Zed`):
 ```powershell

@@ -4,25 +4,24 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ZED_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
 
-find_json_files() {
+link_json_files() {
   shopt -s nullglob
   local files=("$SCRIPT_DIR"/*.json)
   shopt -u nullglob
-  echo "${files[@]}"
-}
-
-copy_json_files() {
-  local files=("$@")
 
   if [[ ${#files[@]} -eq 0 ]]; then
-    echo "No .json files found in $SCRIPT_DIR"
-    exit 1
+    printf 'No .json files found in %s\n' "$SCRIPT_DIR" >&2
+    return 1
   fi
 
   mkdir -p "$ZED_CONFIG_DIR"
-  cp -f "${files[@]}" "$ZED_CONFIG_DIR/"
-  echo "Copied ${#files[@]} file(s) to $ZED_CONFIG_DIR"
+
+  local source destination
+  for source in "${files[@]}"; do
+    destination="$ZED_CONFIG_DIR/${source##*/}"
+    ln -sfn "$source" "$destination"
+    printf 'Linked %s -> %s\n' "$destination" "$source"
+  done
 }
 
-mapfile -t json_files < <(find_json_files)
-copy_json_files "${json_files[@]}"
+link_json_files
