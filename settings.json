@@ -16,10 +16,7 @@
 	"show_signature_help_after_edits": true,
 	"auto_signature_help": true,
 	"redact_private_values": true,
-	"cli_default_open_behavior": "existing_window",
-	"edit_predictions": {
-		"provider": "copilot",
-	},
+	"cli_default_open_behavior": "new_window",
 	"agent_servers": {
 		"pi-acp": {
 			"type": "registry",
@@ -92,16 +89,11 @@
 		"Courier New",
 	],
 	"show_whitespaces": "all",
-	"show_edit_predictions": true,
+	"show_edit_predictions": false,
 	"hard_tabs": true,
 	"git_panel": {
 		"tree_view": true,
 		"dock": "right",
-	},
-	"icon_theme": {
-		"mode": "dark",
-		"light": "Catppuccin Mocha",
-		"dark": "Material Icon Theme",
 	},
 	"base_keymap": "VSCode",
 	"theme": {
@@ -289,7 +281,7 @@
 		"TypeScript": {
 			// Refer https://github.com/jellydn/ts-inlay-hints for how to setup for Neovim and VSCode
 			"show_whitespaces": "all",
-			"show_edit_predictions": true,
+			"show_edit_predictions": false,
 			"hard_tabs": true,
 			"inlay_hints": {
 				"enabled": true,
@@ -300,7 +292,7 @@
 		},
 		"Python": {
 			"show_whitespaces": "all",
-			"show_edit_predictions": true,
+			"show_edit_predictions": false,
 			"hard_tabs": true,
 			"format_on_save": "on",
 			"formatter": {
@@ -373,13 +365,6 @@
 	},
 	"collaboration_panel": {
 		"dock": "right",
-	},
-	"context_servers": {
-		"react-grab-mcp": {
-   "command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"],
-			"env": {},
-		},
 	},
 	"autosave": {
 		"after_delay": {
